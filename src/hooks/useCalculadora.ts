@@ -8,17 +8,19 @@ export enum Operadores {
 }
 
 export const useCalculadora = () => {
-  const [numeroAnterior, setNumeroAnterior] = useState('0');
+  const [numeroAnterior, setNumeroAnterior] = useState('');
   const [numero, setNumero] = useState('0');
   const [operacion, setOperacion] = useState<Operadores>();
   const operando = useRef(false);
 
   const limpiar = () => {
     setNumero('0');
+    setNumeroAnterior('');
+    setOperacion(undefined);
   };
 
   const cambiarNumeroPorAnterior = () => {
-    if (numero.endsWith(',')) {
+    if (numero.endsWith('.')) {
       setNumeroAnterior(numero.slice(0, -1));
     } else {
       setNumeroAnterior(numero);
@@ -27,28 +29,32 @@ export const useCalculadora = () => {
   };
 
   const armarNumero = (numeroTexto: string) => {
+    if (numero === 'Error') {
+      limpiar();
+      return;
+    }
     if (operando.current) {
-      operando.current = false;
-      cambiarNumeroPorAnterior();
-      if (numeroTexto === ',' || numeroTexto === '0') {
+      if (numeroTexto === '.') {
         return;
       }
+      operando.current = false;
+      cambiarNumeroPorAnterior();
       setNumero(numeroTexto);
       return;
     }
 
-    if (numero.includes(',') && numeroTexto === ',') {
+    if (numero.includes('.') && numeroTexto === '.') {
       return;
     }
 
     if (numero.startsWith('0') || numero.startsWith('-0')) {
-      if (numeroTexto === ',') {
+      if (numeroTexto === '.') {
         setNumero(numero + numeroTexto);
-      } else if (numeroTexto === '0' && numero.includes(',')) {
+      } else if (numeroTexto === '0' && numero.includes('.')) {
         setNumero(numero + numeroTexto);
-      } else if (numeroTexto !== '0' && !numero.includes(',')) {
+      } else if (numeroTexto !== '0' && !numero.includes('.')) {
         setNumero(numero.replace('0', numeroTexto));
-      } else if (numeroTexto === '0' && !numero.includes(',')) {
+      } else if (numeroTexto === '0' && !numero.includes('.')) {
         setNumero(numero);
       } else {
         setNumero(numero + numeroTexto);
@@ -59,6 +65,10 @@ export const useCalculadora = () => {
   };
 
   const btnDelete = () => {
+    if (numero === 'Error') {
+      limpiar();
+      return;
+    }
     if (numero === '-0') {
       setNumero('0');
       return;
@@ -104,7 +114,10 @@ export const useCalculadora = () => {
 
   const calcular = () => {
     const num1 = Number(numero);
-    const num2 = Number(numeroAnterior);
+    let num2 = Number(numeroAnterior);
+    if (numeroAnterior === '') {
+      num2 = num1;
+    }
 
     switch (operacion) {
       case Operadores.sumar:
@@ -119,13 +132,14 @@ export const useCalculadora = () => {
       case Operadores.dividir:
         if (num1 === 0) {
           setNumero('Error');
+          setOperacion(undefined);
           return;
         }
         setNumero(`${num2 / num1}`);
         break;
     }
     setOperacion(undefined);
-    setNumeroAnterior('0');
+    setNumeroAnterior('');
   };
 
   return {

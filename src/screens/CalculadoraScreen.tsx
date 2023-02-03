@@ -21,7 +21,7 @@ export const CalculadoraScreen = () => {
 
   return (
     <View className=" flex-1 justify-end py-8 px-3">
-      {numeroAnterior !== '0' && (
+      {numeroAnterior && (
         <Text
           numberOfLines={1}
           adjustsFontSizeToFit
@@ -82,7 +82,7 @@ export const CalculadoraScreen = () => {
       </View>
       <View className="flex-row ">
         <ButtonCalc double text="0" action={armarNumero} />
-        <ButtonCalc text="," action={armarNumero} />
+        <ButtonCalc text="." action={armarNumero} />
         <ButtonCalc text="=" type="orange" action={calcular} />
       </View>
     </View>
